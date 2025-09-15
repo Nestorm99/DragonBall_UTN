@@ -1,51 +1,49 @@
-import { useState, useEffect } from 'react'
-import { Contendor } from "./components/Contenedor"
-import { consultar } from "./api/api.js"
-import { Tarjeta } from './components/Tarjeta.jsx'
+import { useState, useEffect, useMemo } from 'react';
+import { Contendor } from './components/Contenedor.jsx';
+import { consultar } from './api/api.js';
+import { Tarjeta } from './components/Tarjeta.jsx';
 
 function App() {
-  const [items, setItems] = useState([])
-  const [resultados, setResultados] = useState([])
-  const [busqueda, setBusqueda] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [items, setItems] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function cargar() {
-      setLoading(true)
-      const personajes = await consultar()
-      setItems(personajes)
-      setResultados(personajes)
+      setLoading(true);
+      const personajes = await consultar();
+      setItems(personajes);
       setTimeout(() => {
-        setLoading(false)
-      }, 1000)
+        setLoading(false);
+      }, 1000);
     }
-    cargar()
-  }, [])
+    cargar();
+  }, []);
 
-  const Buscar = () => {
-    if (busqueda.trim() === "") {
-      setResultados(items)
-      return
+  const personajesFiltrados = useMemo(() => {
+    if (busqueda.trim() === '') {
+      return items;
     }
 
-    const personajesFiltrados = items.filter((personaje) => {
-      const busquedaMinuscula = busqueda.toLowerCase()
-      const nombrePersonaje = personaje.name.toLowerCase()
-      const kiPersonaje = personaje.ki.toString()
+    // Limpia la búsqueda para que solo contenga números
+    const busquedaLimpia = busqueda.replace(/\D/g, '');
 
-      return nombrePersonaje.includes(busquedaMinuscula) || kiPersonaje.includes(busquedaMinuscula)
-    })
+    return items.filter(personaje => {
+      const nombrePersonaje = personaje.name.toLowerCase();
+      // Limpia el ki del personaje eliminando puntos, comas y otros caracteres no numéricos
+      const kiLimpio = personaje.ki.toString().replace(/[\.,]/g, '');
 
-    setResultados(personajesFiltrados)
-  }
+      return nombrePersonaje.includes(busqueda.toLowerCase()) || kiLimpio.includes(busquedaLimpia);
+    });
+  }, [busqueda, items]);
 
   if (loading) {
-    return <p className="text-3xl font-bold">Cargando....</p>
+    return <p className="text-3xl font-bold">Cargando....</p>;
   }
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen gap-8 p-4 bg-gradient-to-b from-amber-400 via-amber-300 to-emerald-400">
-      
+
       <div className="flex gap-2">
         <input
           type="text"
@@ -54,19 +52,13 @@ function App() {
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
         />
-        <button
-          onClick={Buscar}
-          className="bg-blue-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-900 transition-colors"
-        >
-          Buscar
-        </button>
       </div>
 
       <Contendor>
         {
-          resultados.length > 0 ? (
-            resultados.map((item) => {
-              return <Tarjeta item={item} key={item?.id} />
+          personajesFiltrados.length > 0 ? (
+            personajesFiltrados.map((item) => {
+              return <Tarjeta item={item} key={item?.id} />;
             })
           ) : (
             <p className="text-2xl font-bold text-black">No se encontraron personajes.</p>
@@ -74,7 +66,7 @@ function App() {
         }
       </Contendor>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
