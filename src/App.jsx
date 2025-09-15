@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Contendor } from './components/Contenedor.jsx';
+import { Contendor } from './components/Contenedor';
 import { consultar } from './api/api.js';
 import { Tarjeta } from './components/Tarjeta.jsx';
 
@@ -11,29 +11,41 @@ function App() {
   useEffect(() => {
     async function cargar() {
       setLoading(true);
-      const personajes = await consultar();
-      setItems(personajes);
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
+      try {
+        const personajes = await consultar();
+        setItems(personajes);
+      } catch (error) {
+        console.error('Error al cargar los personajes:', error);
+      } finally {
+        // Un retraso para simular la carga, se puede eliminar en producción
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
+      }
     }
     cargar();
   }, []);
 
+  // Esta es la lógica clave para el filtro reactivo
   const personajesFiltrados = useMemo(() => {
-    if (busqueda.trim() === '') {
+    // Si la búsqueda está vacía o solo contiene espacios, retorna todos los items.
+    if (!busqueda.trim()) {
       return items;
     }
 
-    // Limpia la búsqueda para que solo contenga números
-    const busquedaLimpia = busqueda.replace(/\D/g, '');
+    // Prepara la cadena de búsqueda para la comparación
+    const busquedaMinuscula = busqueda.toLowerCase();
 
     return items.filter(personaje => {
-      const nombrePersonaje = personaje.name.toLowerCase();
-      // Limpia el ki del personaje eliminando puntos, comas y otros caracteres no numéricos
-      const kiLimpio = personaje.ki.toString().replace(/[\.,]/g, '');
+      // Intenta convertir el 'ki' a un número para una comparación más precisa, 
+      // si no es un número, se usa su valor original.
+      const kiNumero = parseFloat(personaje.ki.toString().replace(/[\.,]/g, ''));
 
-      return nombrePersonaje.includes(busqueda.toLowerCase()) || kiLimpio.includes(busquedaLimpia);
+      // Compara el nombre y el 'ki' del personaje con la búsqueda
+      const nombreCoincide = personaje.name.toLowerCase().includes(busquedaMinuscula);
+      const kiCoincide = !isNaN(kiNumero) && kiNumero.toString().includes(busquedaMinuscula);
+
+      return nombreCoincide || kiCoincide;
     });
   }, [busqueda, items]);
 
@@ -43,7 +55,6 @@ function App() {
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen gap-8 p-4 bg-gradient-to-b from-amber-400 via-amber-300 to-emerald-400">
-
       <div className="flex gap-2">
         <input
           type="text"
