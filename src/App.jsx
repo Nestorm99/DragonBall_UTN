@@ -54,12 +54,12 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen gap-8 p-4 bg-gradient-to-b from-emerald-600 via-emerald-400 to-emerald-300">
-      <div className="flex gap-2">
+    <div className="flex flex-col justify-center items-center min-h-screen gap-8 p-4 bg-gradient-to-b from-pink-400 via-pink-300 to-pink-400">
+      <div className="flex text-2xl text-white gap-2">
         <input
           type="text"
-          placeholder="Buscar por nombre o ki..."
-          className="p-2 rounded-lg border-2 border-blue-800"
+          placeholder="Buscar por Nombre o Ki..."
+          className="p-2 rounded-lg border-2 border-pink-600"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
         />
