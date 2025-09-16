@@ -54,7 +54,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen gap-8 p-4 bg-gradient-to-b from-amber-400 via-amber-300 to-emerald-400">
+    <div className="flex flex-col justify-center items-center min-h-screen gap-8 p-4 bg-gradient-to-b from-emerald-600 via-emerald-400 to-emerald-300">
       <div className="flex gap-2">
         <input
           type="text"
